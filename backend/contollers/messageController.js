@@ -2,6 +2,8 @@ import Message from "../models/message.js";
 // import User from "../models/user";
 import mongoose from "mongoose";
 import Conversation from "../models/conversation.js";
+import { getReceiverSocketId } from "../socket/socket.js";
+import {io} from "../socket/socket.js"
 export const sendMessage = async (req,res)=>{
   try {
     const {message} = req.body;
@@ -35,9 +37,15 @@ console.log(senderObjectId, receiverObjectId)
     if(newMessage){
       conversation.messages.push(newMessage._id);
     }
-    // await conversation.save();
-    // await newMessage.save();
+    
     await Promise.all([conversation.save(), newMessage.save()]);
+
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      // io.to(<socket_id>).emit() used to send events to specific client
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
+
     res.status(201).json({status:201, newMessage});
   } catch (error) {
     console.log(error)

@@ -45,15 +45,15 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const { userName, password } = req.body;
+    const user = await User.findOne({ userName });
     const isPasswordCorrect = await bcrypt.compare(
       password,
       user?.password || ""
     );
 
     if (!user || !isPasswordCorrect) {
-      return res.status(400).json({ error: "Invalid username or password" });
+      return res.status(400).json({ error: "Invalid userName or password" });
     }
 
     generateTokenAndSetCookie(user._id, res);
@@ -61,8 +61,8 @@ export const login = async (req, res) => {
     res.status(200).json({
       _id: user._id,
       fullName: user.fullName,
-      username: user.username,
-      profilePic: user.profilePic,
+      username: user.userName,
+      profilePicture: user.profilePicture,
     });
   } catch (error) {
     console.log("Error in login controller", error.message);
